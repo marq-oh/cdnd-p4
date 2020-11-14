@@ -125,7 +125,22 @@ functions:
           method: get
           path: todos/{todoId}/images
           cors: true
-  
+
+  # createImage
+  CreateImage:
+    handler: src/lambda/http/createImage.handler
+    events:
+      - http:
+          method: post
+          path: todos/{todoId}/images
+          cors: true
+          # reqValidatorName: RequestBodyValidator
+          # documentation:
+            # summary: Create a new image
+            # description: Create a new image
+            # requestModels:
+              # 'application/json': ImageRequest
+
 resources:
   Resources:
     # TODO: Add any necessary AWS resources
