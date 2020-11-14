@@ -123,7 +123,7 @@ functions:
     events:
       - http:
           method: get
-          path: groups/{groupId}/images
+          path: todos/{todoId}/images
           cors: true
   
 resources:
