@@ -22,7 +22,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
  
   // Generate and create URL
   const uploadUrl = await getUploadUrl(attachmentId)
-  await createAttachmentUrl(attachmentId)
+  const attachmentUrl = await createAttachmentUrl(attachmentId)
 
   return {
     statusCode: 200,
@@ -30,7 +30,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Origin': '*'
     },
     body: JSON.stringify({
-      uploadUrl
+      uploadUrl,
+      attachmentUrl
     })
   }
 }
