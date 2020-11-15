@@ -4,6 +4,8 @@ service:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
 
 provider:
   name: aws
@@ -25,6 +27,21 @@ provider:
   tracing:
     lambda: true
     apiGateway: true
+
+custom:
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Todo app
+        description: serverless app
+    models:
+      - name: TodoRequest
+        contentType: application/json
+        schema: ${file(src/models/createtodorequest.json)}
+      - name: UpdateTodoRequest
+        contentType: application/json
+        schema: ${file(src/models/updatetodorequest.json)}
 
 functions:
   # TODO: Configure this function
@@ -57,6 +74,7 @@ functions:
           method: post
           path: todos
           authorizer: Auth
+          reqValidatorName: RequestBodyValidator
           cors: true
     iamRoleStatements:
       - Effect: Allow
@@ -72,6 +90,7 @@ functions:
           method: patch
           path: todos/{todoId}
           authorizer: Auth
+          reqValidatorName: RequestBodyValidator
           cors: true
     iamRoleStatements:
       - Effect: Allow
@@ -193,7 +212,7 @@ resources:
               Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENTS_S3_BUCKET}/*'
         Bucket: !Ref AttachmentsBucket
 
-    # Request validator
+    # Request Validator
     RequestBodyValidator:
       Type: AWS::ApiGateway::RequestValidator
       Properties:
