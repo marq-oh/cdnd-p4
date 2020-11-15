@@ -3,8 +3,6 @@ service:
 
 plugins:
   - serverless-webpack
-  - serverless-reqvalidator-plugin
-  - serverless-aws-documentation
   - serverless-iam-roles-per-function
 
 provider:
@@ -21,6 +19,11 @@ provider:
     ATTACHMENT_ID_INDEX: AttachmentIdIndex
     ATTACHMENTS_S3_BUCKET: todosattachments-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
+    AUTH0_JWKSURL: https://dev-w3cr2kre.auth0.com/.well-known/jwks.json
+
+  tracing:
+    lambda: true
+    apiGateway: true
 
   iamRoleStatements:
     - Effect: Allow
@@ -46,23 +49,12 @@ provider:
         - s3:GetObject
       Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_S3_BUCKET}/*
 
-custom:
-  documentation:
-    api:
-      info:
-        version: v1.0.0
-        title: Serverless Todo App
-        description: Serverless application for Todo items
-    models:
-      - name: TodoRequest
-        contentType: application/json
-        schema: ${file(models/TodoItem.json)}
-      - name: TodoUpdate
-        contentType: application/json
-        schema: ${file(models/TodoUpdate.json)}
-
 functions:
   # TODO: Configure this function
+
+  # auth0Authorizer
+  Auth:
+    handler: src/lambda/auth/auth0Authorizer.handler
 
   # getTodos
   GetTodos:
@@ -71,8 +63,9 @@ functions:
       - http:
           method: get
           path: todos
+          authorizer: Auth
           cors: true
-  
+          
   # createTodos
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
@@ -80,13 +73,8 @@ functions:
       - http:
           method: post
           path: todos
+          authorizer: Auth
           cors: true
-          # reqValidatorName: RequestBodyValidator
-          # documentation:
-            # summary: Create a new Todo
-            # description: Create a new Todo
-            # requestModels:
-              # 'application/json': TodoRequest
 
   # updateTodo
   UpdateTodo:
@@ -95,13 +83,8 @@ functions:
       - http:
           method: patch
           path: todos/{todoId}
+          authorizer: Auth
           cors: true
-          # reqValidatorName: RequestBodyValidator
-          # documentation:
-            # summary: Update a Todo
-            # description: Update a Todo
-            # requestModels:
-               #'application/json': TodoUpdate
 
   # deleteTodo
   DeleteTodo:
@@ -110,7 +93,9 @@ functions:
       - http:
           method: delete
           path: todos/{todoId}
+          authorizer: Auth
           cors: true
+
 
   # generateUploadUrl
   GenerateUploadUrl:
@@ -119,17 +104,24 @@ functions:
       - http:
           method: post
           path: todos/{todoId}/attachment
+          authorizer: Auth
           cors: true
-          # reqValidatorName: RequestBodyValidator
-          # documentation:
-            # summary: Create a new image
-            # description: Create a new image
-            # requestModels:
-              # 'application/json': ImageRequest
 
 resources:
   Resources:
     # TODO: Add any necessary AWS resources
+
+    # API Gateway
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
 
     # DynamoDB Tables
     TodosTable:
