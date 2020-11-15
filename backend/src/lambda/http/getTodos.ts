@@ -8,11 +8,13 @@ const logger = createLogger('getTodos')
 import { getUserId } from '../../auth/utils'
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  logger.info('Processing createToDo event', { event })
+  logger.info('Processing getTodo event', { event })
   
   // Set data
   const userId = getUserId(event)
-  console.log('User ID: ' + userId)
+  logger.info('UserID: ', { event })
+
+  // console.log('User ID: ' + userId)
 
   // Get ToDos
   const items = await getTodos(userId)

@@ -16,13 +16,15 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const newData: UpdateTodoRequest = JSON.parse(event.body)
 
   // Update
-  await updateTodo(todoId, newData)
+  const updatedItem = await updateTodo(todoId, newData)
 
   return {
     statusCode: 200,
     headers: {
       'Access-Control-Allow-Origin': '*'
     },
-    body: ''
+    body: JSON.stringify({
+      updatedItem
+    })
   }
 }

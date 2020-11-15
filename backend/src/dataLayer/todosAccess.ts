@@ -13,7 +13,7 @@ import { TodoUpdate } from '../models/TodoUpdate'
 export class TodosAccess {
 
   constructor(
-    private readonly docClient: DocumentClient = XAWS.DynamoDB.createDynamoDBClient(),
+    private readonly docClient: DocumentClient = createDynamoDBClient(),
     private readonly todosTable = process.env.TODOS_TABLE,
     private readonly todosByUserIndex = process.env.TODOS_BY_USER_INDEX,
     private readonly bucketName = process.env.ATTACHMENTS_S3_BUCKET,
@@ -63,7 +63,7 @@ export class TodosAccess {
   // create todoItem
   async createTodoItem(todoItem: TodoItem) {
     logger.info(`Create todoItem ${todoItem.todoId}`)
-
+    console.log('Create todoItem')
     await this.docClient.put({
       TableName: this.todosTable,
       Item: todoItem
@@ -73,7 +73,7 @@ export class TodosAccess {
   // Update todoItem
   async updateTodoItem(todoId: string, todoUpdate: TodoUpdate) {
     logger.info(`Update todoItem ${todoId}`)
-
+    console.log('Update todoItem')
     await this.docClient.update({
       TableName: this.todosTable,
       Key: {
@@ -94,7 +94,7 @@ export class TodosAccess {
   // Delete todoItem
   async deleteTodoItem(todoId: string) {
     logger.info(`Delete todoItem ${todoId}`)
-
+    console.log('Delete todoItem')
     await this.docClient.delete({
       TableName: this.todosTable,
       Key: {
@@ -134,4 +134,16 @@ export class TodosAccess {
     })
     return uploadUrl
   }
+}
+
+function createDynamoDBClient() {
+  if (process.env.IS_OFFLINE) {
+    console.log('Creating a local DynamoDB instance')
+    return new XAWS.DynamoDB.DocumentClient({
+      region: 'localhost',
+      endpoint: 'http://localhost:8000'
+    })
+  }
+
+  return new XAWS.DynamoDB.DocumentClient()
 }

@@ -30,11 +30,11 @@ export async function createTodo(userId: string, createTodoRequest: CreateTodoRe
 }
 
 export async function updateTodo(todoId: string, updateTodoRequest: UpdateTodoRequest) {
-  todosAccess.updateTodoItem(todoId, updateTodoRequest as TodoUpdate)
+  await todosAccess.updateTodoItem(todoId, updateTodoRequest as TodoUpdate)
 }
 
 export async function deleteTodo(todoId: string) {
-  todosAccess.deleteTodoItem(todoId)
+  await todosAccess.deleteTodoItem(todoId)
 }
 
 export async function getUploadUrl(attachmentId: string): Promise<string> {
