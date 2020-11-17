@@ -34,9 +34,9 @@ custom:
       info:
         version: v1.0.0
         title: Todo app
-        description: serverless app
+        description: Todo serverless app
     models:
-      - name: TodoRequest
+      - name: CreateTodoRequest
         contentType: application/json
         schema: ${file(src/models/createtodorequest.json)}
       - name: UpdateTodoRequest
@@ -74,8 +74,13 @@ functions:
           method: post
           path: todos
           authorizer: Auth
-          reqValidatorName: RequestBodyValidator
           cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create new Todo
+            description: Create new Todo
+            requestModels:
+              'application/json': CreateTodoRequest
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -90,8 +95,13 @@ functions:
           method: patch
           path: todos/{todoId}
           authorizer: Auth
-          reqValidatorName: RequestBodyValidator
           cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Update Todo
+            description: Update Todo
+            requestModels:
+              'application/json': UpdateTodoRequest
     iamRoleStatements:
       - Effect: Allow
         Action:
