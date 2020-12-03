@@ -3,7 +3,7 @@ import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } f
 import 'source-map-support/register'
 import * as uuid from 'uuid'
 
-import { getUploadUrl, createAttachmentUrl } from '../../businessLogic/todos'
+import { getUploadUrl, createAttachmentUrl } from '../../businessLogic/experiments'
 import { createLogger } from '../../utils/logger'
 const logger = createLogger('generateUploadUrl')
 
@@ -12,12 +12,12 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   logger.info('Processing generateUploadUrl event', { event })
 
   // Set data
-  const todoId = event.pathParameters.todoId
+  const experimentId = event.pathParameters.experimentId
   const attachmentId = uuid.v4()
  
   // Generate and create URL
   const uploadUrl = await getUploadUrl(attachmentId)
-  const attachmentUrl = await createAttachmentUrl(todoId, attachmentId)
+  const attachmentUrl = await createAttachmentUrl(experimentId, attachmentId)
 
   return {
     statusCode: 200,

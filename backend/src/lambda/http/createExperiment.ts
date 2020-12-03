@@ -2,22 +2,22 @@ import 'source-map-support/register'
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
 
-import { createTodo } from '../../businessLogic/todos'
+import { createExperiment } from '../../businessLogic/experiments'
 import { createLogger } from '../../utils/logger'
-const logger = createLogger('createTodo')
+const logger = createLogger('createExperiment')
 
 import { getUserId } from '../../auth/utils'
-import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
+import { CreateExperimentRequest } from '../../requests/CreateExperimentRequest'
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  logger.info('Processing createTodo event', { event })
+  logger.info('Processing createExperiment event', { event })
 
   // Set data
   const userId = getUserId(event)
-  const newData: CreateTodoRequest = JSON.parse(event.body)
+  const newData: CreateExperimentRequest = JSON.parse(event.body)
 
-  // Create ToDo
-  const newTodo = await createTodo(userId, newData)
+  // Create Experiment
+  const newExperiment = await createExperiment(userId, newData)
 
   return {
     statusCode: 201,
@@ -25,7 +25,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Origin': '*'
     },
     body: JSON.stringify({
-      item: newTodo
+      item: newExperiment
     })
   }
 }

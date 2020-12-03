@@ -1,14 +1,14 @@
 import 'source-map-support/register'
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
-import { getTodos } from '../../businessLogic/todos'
+import { getExperiments } from '../../businessLogic/experiments'
 import { createLogger } from '../../utils/logger'
-const logger = createLogger('getTodos')
+const logger = createLogger('getExperiments')
 
 import { getUserId } from '../../auth/utils'
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  logger.info('Processing getTodo event', { event })
+  logger.info('Processing getExperiment event', { event })
   
   // Set data
   const userId = getUserId(event)
@@ -16,8 +16,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   // console.log('User ID: ' + userId)
 
-  // Get ToDos
-  const items = await getTodos(userId)
+  // Get Experiments
+  const items = await getExperiments(userId)
 
   return {
     statusCode: 200,

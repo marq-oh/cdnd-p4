@@ -1,19 +1,16 @@
 {
   "$schema":"http://json-schema.org/draft-04/schema",
-  "title": "Update todo",
+  "title": "Create experiment",
   "type": "object",
   "properties": {
-    "name": {
+    "title": {
       "type": "string",
       "minLength": 1
     },
-    "dueDate": {
+    "description": {
       "type": "string"
-    },
-    "done": {
-      "type": "boolean"
     }
   },
-  "required": ["name", "dueDate", "done"],
+  "required": ["title", "description"],
   "additionalProperties": false
 }

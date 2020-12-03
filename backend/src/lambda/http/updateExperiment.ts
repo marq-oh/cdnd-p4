@@ -2,21 +2,21 @@ import 'source-map-support/register'
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
 
-import { updateTodo } from '../../businessLogic/todos'
+import { updateExperiment } from '../../businessLogic/experiments'
 import { createLogger } from '../../utils/logger'
-const logger = createLogger('updateTodo')
+const logger = createLogger('updateExperiment')
 
-import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
+import { UpdateExperimentRequest } from '../../requests/UpdateExperimentRequest'
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  logger.info('Processing updateTodo event', { event })
+  logger.info('Processing updateExperiment event', { event })
 
   // Get Parameters
-  const todoId = event.pathParameters.todoId
-  const newData: UpdateTodoRequest = JSON.parse(event.body)
+  const experimentId = event.pathParameters.experimentId
+  const newData: UpdateExperimentRequest = JSON.parse(event.body)
 
   // Update
-  const updatedItem = await updateTodo(todoId, newData)
+  const updatedItem = await updateExperiment(experimentId, newData)
 
   return {
     statusCode: 200,
