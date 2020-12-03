@@ -4,8 +4,6 @@ service:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
-  - serverless-reqvalidator-plugin
-  - serverless-aws-documentation
 
 provider:
   name: aws
@@ -28,20 +26,21 @@ provider:
     lambda: true
     apiGateway: true
 
-custom:
-  documentation:
-    api:
-      info:
-        version: v1.0.0
-        title: Todo app
-        description: Todo serverless app
-    models:
-      - name: CreateTodoRequest
-        contentType: application/json
-        schema: ${file(src/models/createtodorequest.json)}
-      - name: UpdateTodoRequest
-        contentType: application/json
-        schema: ${file(src/models/updatetodorequest.json)}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:GetItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_BY_USER_INDEX}
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_S3_BUCKET}/*
 
 functions:
   # TODO: Configure this function
@@ -59,12 +58,6 @@ functions:
           path: todos
           authorizer: Auth
           cors: true
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:Query
-          - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_BY_USER_INDEX}
           
   # createTodos
   CreateTodo:
@@ -75,17 +68,6 @@ functions:
           path: todos
           authorizer: Auth
           cors: true
-          reqValidatorName: RequestBodyValidator
-          documentation:
-            summary: Create new Todo
-            description: Create new Todo
-            requestModels:
-              'application/json': CreateTodoRequest
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   # updateTodo
   UpdateTodo:
@@ -96,18 +78,6 @@ functions:
           path: todos/{todoId}
           authorizer: Auth
           cors: true
-          reqValidatorName: RequestBodyValidator
-          documentation:
-            summary: Update Todo
-            description: Update Todo
-            requestModels:
-              'application/json': UpdateTodoRequest
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:UpdateItem
-          - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   # deleteTodo
   DeleteTodo:
@@ -118,12 +88,7 @@ functions:
           path: todos/{todoId}
           authorizer: Auth
           cors: true
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:DeleteItem
-          - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+
 
   # generateUploadUrl
   GenerateUploadUrl:
@@ -134,17 +99,6 @@ functions:
           path: todos/{todoId}/attachment
           authorizer: Auth
           cors: true
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:UpdateItem
-          - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-      - Effect: Allow
-        Action:
-          - s3:PutObject
-          - s3:GetObject
-        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_S3_BUCKET}/*
 
 resources:
   Resources:
@@ -222,7 +176,7 @@ resources:
               Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENTS_S3_BUCKET}/*'
         Bucket: !Ref AttachmentsBucket
 
-    # Request Validator
+    # Request validator
     RequestBodyValidator:
       Type: AWS::ApiGateway::RequestValidator
       Properties:

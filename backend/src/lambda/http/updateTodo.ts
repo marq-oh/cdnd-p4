@@ -1,23 +1,22 @@
 import 'source-map-support/register'
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
-import * as uuid from 'uuid'
 
-import { getUploadUrl, createAttachmentUrl } from '../../businessLogic/todos'
+import { updateTodo } from '../../businessLogic/todos'
 import { createLogger } from '../../utils/logger'
-const logger = createLogger('generateUploadUrl')
+const logger = createLogger('updateTodo')
 
+import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  logger.info('Processing generateUploadUrl event', { event })
+  logger.info('Processing updateTodo event', { event })
 
-  // Set data
+  // Get Parameters
   const todoId = event.pathParameters.todoId
-  const attachmentId = uuid.v4()
- 
-  // Generate and create URL
-  const uploadUrl = await getUploadUrl(attachmentId)
-  const attachmentUrl = await createAttachmentUrl(todoId, attachmentId)
+  const newData: UpdateTodoRequest = JSON.parse(event.body)
+
+  // Update
+  const updatedItem = await updateTodo(todoId, newData)
 
   return {
     statusCode: 200,
@@ -25,8 +24,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Origin': '*'
     },
     body: JSON.stringify({
-      uploadUrl,
-      attachmentUrl
+      updatedItem
     })
   }
 }
